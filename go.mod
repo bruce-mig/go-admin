@@ -12,6 +12,7 @@ require golang.org/x/crypto v0.21.0
 
 require (
 	github.com/andybalholm/brotli v1.0.5 // indirect
+	github.com/dgrijalva/jwt-go/v4 v4.0.0-preview1
 	github.com/go-sql-driver/mysql v1.7.0 // indirect
 	github.com/google/uuid v1.5.0 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
