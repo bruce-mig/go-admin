@@ -6,24 +6,30 @@ import (
 
 	"github.com/bruce-mig/go-admin/db"
 	"github.com/bruce-mig/go-admin/models"
+	"github.com/bruce-mig/go-admin/util"
 	"github.com/dgrijalva/jwt-go/v4"
 	"github.com/gofiber/fiber/v2"
-	"golang.org/x/crypto/bcrypt"
 )
 
-type registerRequest struct {
-	Id             uint   `gorm:"primary key;autoIncrement" json:"id"`
-	FirstName      string `json:"first_name"`
-	LastName       string `json:"last_name"`
-	Email          string `gorm:"unique" json:"email" `
-	Password       string `json:"password"`
-	VerifyPassword string `json:"verify_password"`
-}
+type (
+	registerRequest struct {
+		Id             uint   `gorm:"primary key;autoIncrement" json:"id"`
+		FirstName      string `json:"first_name"`
+		LastName       string `json:"last_name"`
+		Email          string `gorm:"unique" json:"email" `
+		Password       string `json:"password"`
+		VerifyPassword string `json:"verify_password"`
+	}
 
-type loginRequest struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
-}
+	loginRequest struct {
+		Email    string `json:"email"`
+		Password string `json:"password"`
+	}
+
+	Claims struct {
+		jwt.StandardClaims
+	}
+)
 
 func Register(c *fiber.Ctx) error {
 	var data registerRequest
@@ -39,16 +45,14 @@ func Register(c *fiber.Ctx) error {
 		})
 	}
 
-	password, _ := bcrypt.GenerateFromPassword([]byte(data.Password), 14)
-
 	user := models.User{
-		// Id:        data.Id,
 		FirstName: data.FirstName,
 		LastName:  data.LastName,
 		Email:     data.Email,
-		Password:  password,
+		RoleId:    1,
 	}
 
+	user.SetPassword(data.Password)
 	db.DB.Create(&user)
 
 	return c.JSON(user)
@@ -72,7 +76,7 @@ func Login(c *fiber.Ctx) error {
 		})
 	}
 
-	err := bcrypt.CompareHashAndPassword(user.Password, []byte(data.Password))
+	err := user.ComparePassword(data.Password)
 	if err != nil {
 		c.Status(400)
 		return c.JSON(fiber.Map{
@@ -80,14 +84,7 @@ func Login(c *fiber.Ctx) error {
 		})
 	}
 
-	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
-		Issuer: strconv.Itoa(int(user.Id)),
-		ExpiresAt: &jwt.Time{
-			time.Now().Add(time.Hour * 24),
-		},
-	})
-
-	token, err := claims.SignedString([]byte("secret"))
+	token, err := util.GenerateJwt(strconv.Itoa(int(user.Id)))
 	if err != nil {
 		return c.SendStatus(fiber.StatusInternalServerError)
 	}
@@ -103,5 +100,33 @@ func Login(c *fiber.Ctx) error {
 
 	return c.JSON(fiber.Map{
 		"message": "successfully logged in",
+	})
+}
+
+func User(c *fiber.Ctx) error {
+	cookie := c.Cookies("jwt")
+
+	id, _ := util.ParseJwt(cookie)
+
+	var user models.User
+	db.DB.Where("id = ?", id).First(&user)
+
+	return c.JSON(user)
+}
+
+func Logout(c *fiber.Ctx) error {
+	// c.ClearCookie("jwt")
+
+	cookie := fiber.Cookie{
+		Name:     "jwt",
+		Value:    "",
+		Expires:  time.Now().Add(-time.Hour),
+		HTTPOnly: true,
+	}
+
+	c.Cookie(&cookie)
+
+	return c.JSON(fiber.Map{
+		"message": "successfully logged out",
 	})
 }
