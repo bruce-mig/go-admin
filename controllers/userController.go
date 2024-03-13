@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"math"
 	"strconv"
 
 	"github.com/bruce-mig/go-admin/db"
@@ -12,20 +13,20 @@ func ListUsers(c *fiber.Ctx) error {
 	page, _ := strconv.Atoi(c.Query("page", "1"))
 
 	limit := 5
-	offset := (page-1)*limit
-	var total in64
+	offset := (page - 1) * limit
+	var total int64
 
 	var users []models.User
 
 	db.DB.Preload("Role").Offset(offset).Limit(limit).Find(&users)
-	dd.DB.Model(&models.User{}).Count(&total)
+	db.DB.Model(&models.User{}).Count(&total)
 	return c.JSON(fiber.Map{
 		"data": users,
 		"meta": fiber.Map{
-			"total": total,
-			"page": page,
-			"last_page": math.Ceil(float64(int(total)/limit)),
-		}
+			"total":     total,
+			"page":      page,
+			"last_page": math.Ceil(float64(int(total) / limit)),
+		},
 	})
 }
 
