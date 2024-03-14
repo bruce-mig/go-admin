@@ -4,17 +4,24 @@ import (
 	"strconv"
 
 	"github.com/bruce-mig/go-admin/db"
+	"github.com/bruce-mig/go-admin/middleware"
 	"github.com/bruce-mig/go-admin/models"
 	"github.com/gofiber/fiber/v2"
 )
 
 func ListProducts(c *fiber.Ctx) error {
+	if err := middleware.IsAuthorized(c, "products"); err != nil {
+		return err
+	}
 	page, _ := strconv.Atoi(c.Query("page", "1"))
 
 	return c.JSON(models.Paginate(db.DB, &models.Product{}, page))
 }
 
 func CreateProduct(c *fiber.Ctx) error {
+	if err := middleware.IsAuthorized(c, "products"); err != nil {
+		return err
+	}
 	var product models.Product
 
 	if err := c.BodyParser(&product); err != nil {
@@ -26,6 +33,9 @@ func CreateProduct(c *fiber.Ctx) error {
 }
 
 func GetProduct(c *fiber.Ctx) error {
+	if err := middleware.IsAuthorized(c, "products"); err != nil {
+		return err
+	}
 	id, _ := strconv.Atoi(c.Params("id"))
 
 	product := models.Product{
@@ -38,6 +48,9 @@ func GetProduct(c *fiber.Ctx) error {
 }
 
 func UpdateProduct(c *fiber.Ctx) error {
+	if err := middleware.IsAuthorized(c, "products"); err != nil {
+		return err
+	}
 	id, _ := strconv.Atoi(c.Params("id"))
 
 	product := models.Product{
@@ -54,6 +67,9 @@ func UpdateProduct(c *fiber.Ctx) error {
 }
 
 func DeleteProduct(c *fiber.Ctx) error {
+	if err := middleware.IsAuthorized(c, "products"); err != nil {
+		return err
+	}
 	id, _ := strconv.Atoi(c.Params("id"))
 
 	product := models.Product{

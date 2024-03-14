@@ -4,6 +4,7 @@ import (
 	"strconv"
 
 	"github.com/bruce-mig/go-admin/db"
+	"github.com/bruce-mig/go-admin/middleware"
 	"github.com/bruce-mig/go-admin/models"
 	"github.com/gofiber/fiber/v2"
 )
@@ -15,6 +16,9 @@ import (
 // }
 
 func ListRoles(c *fiber.Ctx) error {
+	if err := middleware.IsAuthorized(c, "roles"); err != nil {
+		return err
+	}
 	var roles []models.Role
 
 	db.DB.Find(&roles)
@@ -23,6 +27,9 @@ func ListRoles(c *fiber.Ctx) error {
 }
 
 func CreateRole(c *fiber.Ctx) error {
+	if err := middleware.IsAuthorized(c, "roles"); err != nil {
+		return err
+	}
 	var roleDto fiber.Map
 
 	if err := c.BodyParser(&roleDto); err != nil {
@@ -51,6 +58,9 @@ func CreateRole(c *fiber.Ctx) error {
 }
 
 func GetRole(c *fiber.Ctx) error {
+	if err := middleware.IsAuthorized(c, "roles"); err != nil {
+		return err
+	}
 	id, _ := strconv.Atoi(c.Params("id"))
 
 	role := models.Role{
@@ -63,6 +73,9 @@ func GetRole(c *fiber.Ctx) error {
 }
 
 func UpdateRole(c *fiber.Ctx) error {
+	if err := middleware.IsAuthorized(c, "roles"); err != nil {
+		return err
+	}
 	id, _ := strconv.Atoi(c.Params("id"))
 
 	var roleDto fiber.Map
@@ -97,6 +110,9 @@ func UpdateRole(c *fiber.Ctx) error {
 }
 
 func DeleteRole(c *fiber.Ctx) error {
+	if err := middleware.IsAuthorized(c, "roles"); err != nil {
+		return err
+	}
 	id, _ := strconv.Atoi(c.Params("id"))
 
 	role := models.Role{

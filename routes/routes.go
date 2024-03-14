@@ -45,4 +45,5 @@ func SetupRoutes(app *fiber.App) {
 
 	app.Get("/api/orders", controllers.ListOrders)
 	app.Post("/api/export", controllers.Export)
+	app.Get("/api/chart", controllers.Chart)
 }
