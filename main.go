@@ -1,6 +1,8 @@
 package main
 
 import (
+	"log"
+
 	"github.com/bruce-mig/go-admin/db"
 	"github.com/bruce-mig/go-admin/routes"
 	"github.com/gofiber/fiber/v2"
@@ -19,6 +21,8 @@ func main() {
 
 	routes.SetupRoutes(app)
 
-	println("Listening on port 8080!")
-	app.Listen(":8000")
+	log.Println("Listening on port 8000!")
+	if err := app.Listen(":8000"); err != nil {
+		log.Fatal("Failed to listen")
+	}
 }
