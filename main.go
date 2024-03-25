@@ -16,7 +16,7 @@ func main() {
 
 	app.Use(cors.New(cors.Config{
 		AllowCredentials: true,
-		AllowOrigins:     "http://localhost:8000",
+		AllowOrigins:     "http://localhost:8000, http://localhost:3000",
 	}))
 
 	routes.SetupRoutes(app)
